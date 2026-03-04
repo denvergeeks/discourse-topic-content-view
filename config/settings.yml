@@ -1,0 +1,4 @@
+plugins:
+  published_pages_cooked_enabled:
+    default: true
+    client: true
