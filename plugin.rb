@@ -1,6 +1,6 @@
 # name: discourse-topic-content-view
 # about: Display topic cooked content at /topic-content/:id with full theme JS
-# version: 0.3.0
+# version: 0.4.0
 # authors: @denvergeeks
 # url: https://github.com/denvergeeks/discourse-topic-content-view
 
@@ -25,33 +25,36 @@ after_initialize do
       cooked     = post.cooked
       nonce      = SecureRandom.hex(16)
 
+      # Resolve the hashed publish asset path the same way Discourse does
+      publish_js_path = begin
+        ActionController::Base.helpers.asset_path('publish.js')
+      rescue
+        # Fallback: scan the assets directory for the hashed filename
+        publish_file = Dir.glob(Rails.root.join('public', 'assets', 'publish-*.js')).first
+        publish_file ? "/assets/#{File.basename(publish_file)}" : nil
+      end
+
       # Build stylesheet link tags the same way published pages do
       css_tags = ""
       begin
         manager = Stylesheet::Manager.new(theme_id: theme_id)
 
-        # Color definitions (light scheme)
-        color_scheme_id = ColorScheme.find_by(name: 'Light')&.id || ColorScheme.first&.id
         manager.stylesheet_details(:color_definitions, 'all').each do |s|
           css_tags += "  <link href=\"#{s[:new_href]}\" media=\"all\" rel=\"stylesheet\">\n"
         end rescue nil
 
-        # Publish stylesheet (base styles)
         manager.stylesheet_details(:publish, 'all').each do |s|
           css_tags += "  <link href=\"#{s[:new_href]}\" media=\"all\" rel=\"stylesheet\">\n"
         end rescue nil
 
-        # All common theme stylesheets
         manager.stylesheet_details(:common_theme, 'all').each do |s|
           css_tags += "  <link href=\"#{s[:new_href]}\" media=\"all\" rel=\"stylesheet\" data-theme-id=\"#{s[:theme_id]}\">\n"
         end rescue nil
 
-        # Desktop theme stylesheets
         manager.stylesheet_details(:desktop_theme, 'all').each do |s|
           css_tags += "  <link href=\"#{s[:new_href]}\" media=\"all\" rel=\"stylesheet\" data-theme-id=\"#{s[:theme_id]}\">\n"
         end rescue nil
 
-        # Plugin stylesheets
         Discourse.find_plugin_css_assets(
           include_disabled: false,
           mobile_view: false,
@@ -63,14 +66,9 @@ after_initialize do
         Rails.logger.error "TopicContentView CSS error: #{e.message}"
       end
 
-      # Build JS script tags - use the publish entrypoint + theme JS
-      js_tags = ""
-      begin
-        # The publish entrypoint is what published pages use
-        js_tags += "  <script defer src=\"/assets/publish.js\" data-discourse-entrypoint=\"publish\" nonce=\"#{nonce}\"></script>\n"
-      rescue => e
-        Rails.logger.error "TopicContentView JS error: #{e.message}"
-      end
+      # Build JS tag using the resolved hashed path
+      js_tag = publish_js_path ?
+        "  <script defer src=\"#{publish_js_path}\" data-discourse-entrypoint=\"publish\" nonce=\"#{nonce}\"></script>\n" : ""
 
       html = <<~HTML
         <!DOCTYPE html>
@@ -78,7 +76,6 @@ after_initialize do
         <head>
           <meta charset="utf-8">
           <title>#{title} - #{site_title}</title>
-          <meta name="generator" content="Discourse #{Discourse::VERSION::STRING}">
           <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
         #{css_tags}
           <style>
@@ -123,7 +120,7 @@ after_initialize do
               #{cooked}
             </div>
           </div>
-        #{js_tags}
+        #{js_tag}
         </body>
         </html>
       HTML
