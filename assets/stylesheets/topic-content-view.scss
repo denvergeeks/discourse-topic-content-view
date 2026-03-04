@@ -1,0 +1,50 @@
+.topic-content-view {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2em;
+  
+  .topic-content-container {
+    background: var(--secondary);
+    padding: 2em;
+    border-radius: 8px;
+  }
+  
+  .topic-content-title {
+    font-size: 2em;
+    margin-bottom: 1em;
+    color: var(--primary);
+    border-bottom: 2px solid var(--primary-low);
+    padding-bottom: 0.5em;
+  }
+  
+  .topic-content-body {
+    font-size: 1.1em;
+    line-height: 1.6;
+    
+    // Apply all standard cooked styles
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+    
+    blockquote {
+      border-left: 5px solid var(--primary-low-mid);
+      padding-left: 1em;
+      margin: 1em 0;
+    }
+    
+    pre {
+      background-color: var(--primary-very-low);
+      padding: 1em;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    
+    code {
+      background-color: var(--primary-very-low);
+      padding: 0.2em 0.4em;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+  }
+}
