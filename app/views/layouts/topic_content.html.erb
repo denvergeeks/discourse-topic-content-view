@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html lang="<%= I18n.locale %>">
+<html>
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= ERB::Util.html_escape(@topic.title) %></title>
+    <title><%= @topic&.title || SiteSetting.title %></title>
     <%= discourse_stylesheet_link_tag :desktop %>
-    <%= discourse_stylesheet_link_tag :desktop_theme %>
+    <%= discourse_stylesheet_link_tag :mobile %>
+    <%= discourse_stylesheet_link_tag :topic_content_view %>
   </head>
   <body class="topic-content-view">
-    <%= yield %>
+    <main class="topic-content-view__container">
+      <%= yield %>
+    </main>
   </body>
 </html>
