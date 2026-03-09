@@ -7,6 +7,9 @@
 enabled_site_setting :topic_content_view_enabled
 
 after_initialize do
+
+ApplicationController.prepend_view_path(File.join(File.dirname(__FILE__), "app/views"))
+  
   # ── Inline JS ─────────────────────────────────────────────────────────────
   # Replicates theme component decorator behaviours without publish.js.
   # publish.js crashes with "Cannot read properties of undefined (reading
