@@ -1,17 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= ERB::Util.html_escape(@topic.title) %> - <%= ERB::Util.html_escape(@site_title) %></title>
-<% @css_links.each do |href| %>
-  <link rel="stylesheet" href="<%= ERB::Util.html_escape(href) %>">
-<% end %>
-</head>
-<body class="topic-content-view">
-  <%= yield %>
-  <script nonce="<%= @nonce %>">
-    <%= raw @init_script %>
-  </script>
-</body>
+<html lang="<%= I18n.locale %>">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= ERB::Util.html_escape(@topic.title) %></title>
+    <%= discourse_stylesheet_link_tag :desktop %>
+    <%= discourse_stylesheet_link_tag :desktop_theme %>
+  </head>
+  <body class="topic-content-view">
+    <%= yield %>
+  </body>
 </html>
