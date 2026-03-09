@@ -1,6 +1,6 @@
 # name: discourse-topic-content-view
-# about: Minimal view rendering only a topic's first-post cooked content
-# version: 0.9.1
+# about: Renders a topic's first-post cooked content via a JSON API + Ember route
+# version: 1.0.0
 # authors: @denvergeeks
 # url: https://github.com/denvergeeks/discourse-topic-content-view
 
@@ -9,22 +9,32 @@ enabled_site_setting :topic_content_view_enabled
 register_asset "stylesheets/topic-content-view.scss", :desktop
 
 after_initialize do
-  ApplicationController.prepend_view_path(File.join(File.dirname(__FILE__), "app/views"))
-
   class ::TopicContentViewController < ::ApplicationController
     requires_plugin 'discourse-topic-content-view'
-    skip_before_action :check_xhr, :preload_json, :verify_authenticity_token
-    layout 'topic_content'
+    skip_before_action :verify_authenticity_token
 
     def show
       topic_id = params[:id] || params[:slug]
-      @topic_view = TopicView.new(topic_id, current_user)
-      @topic = @topic_view.topic
-      raise Discourse::NotFound unless @topic
-      guardian.ensure_can_see!(@topic)
-      @post = @topic.ordered_posts.first
-      raise Discourse::NotFound unless @post
-      render 'discourse_topic_content_view/topic_content/show', formats: [:html]
+      topic_view = TopicView.new(topic_id, current_user)
+      topic = topic_view.topic
+
+      raise Discourse::NotFound unless topic
+      guardian.ensure_can_see!(topic)
+
+      post = topic.ordered_posts.first
+      raise Discourse::NotFound unless post
+
+      render json: {
+        id: topic.id,
+        title: topic.title,
+        slug: topic.slug,
+        category_id: topic.category_id,
+        category_name: topic.category&.name,
+        tags: topic.tags.map(&:name),
+        cooked: post.cooked,
+        created_at: post.created_at,
+        updated_at: post.updated_at
+      }
     rescue Discourse::InvalidAccess
       raise Discourse::NotFound
     end
@@ -32,8 +42,10 @@ after_initialize do
 
   Discourse::Application.routes.prepend do
     get '/t/:slug/:id/content' => 'topic_content_view#show',
-        constraints: { id: /\d+/, slug: /[^\/]+/ }
+        constraints: { id: /\d+/, slug: /[^\/]+/ },
+        defaults: { format: :json }
     get '/t/:id/content' => 'topic_content_view#show',
-        constraints: { id: /[^.]+/ }
+        constraints: { id: /[^.]+/ },
+        defaults: { format: :json }
   end
 end
