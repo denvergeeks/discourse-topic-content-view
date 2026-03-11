@@ -1,3 +1,3 @@
 export default function () {
-  this.route("topic-content-view", { path: "/tc/:slug/:id" });
+  this.route("topic-content-view", { path: "/t/:slug/:id/tc" });
 }
