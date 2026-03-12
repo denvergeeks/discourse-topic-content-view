@@ -1,9 +1,5 @@
 import Route from "@ember/routing/route";
-import { ajax } from "discourse/lib/ajax";
 
-export default class AdminPluginsTopicContentViewRoute extends Route {
-  async model() {
-    const data = await ajax("/admin/plugins/topic-content-view");
-    return data.modes || [];
-  }
-}
+// Data loading is handled inside the AdminPluginsTopicContentView Glimmer
+// component itself, so this route is intentionally minimal.
+export default class AdminPluginsTopicContentViewRoute extends Route {}
