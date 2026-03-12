@@ -161,36 +161,25 @@ export default class AdminPluginsTopicContentView extends Component {
 
             {{#if (eq mode.value this.expandedMode)}}
               <div class="tcv-mode-fields">
-                <label>{{i18n "topic_content_view.admin.value"}}
-                  <input
-                    type="text"
-                    value={{mode.value}}
-                    disabled={{mode.preset}}
-                    {{on "input" (fn this.updateField mode "value")}}
-                  />
-                </label>
-                <label>{{i18n "topic_content_view.admin.label"}}
-                  <input
-                    type="text"
-                    value={{mode.label}}
-                    {{on "input" (fn this.updateField mode "label")}}
-                  />
-                </label>
-                <label>{{i18n "topic_content_view.admin.classes"}}
-                  <input
-                    type="text"
-                    value={{mode.classes}}
-                    {{on "input" (fn this.updateField mode "classes")}}
-                  />
-                </label>
-                <label>{{i18n "topic_content_view.admin.css"}}
-                  <textarea
-                    {{on "input" (fn this.updateCss mode)}}
-                  >{{mode.css}}</textarea>
-                </label>
-                <button class="btn btn-primary" {{on "click" this.saveAll}} disabled={{this.saving}}>
-                  {{dIcon "floppy-disk"}} {{i18n "topic_content_view.admin.save"}}
-                </button>
+<label>{{i18n "topic_content_view.admin.field_value"}}
+  <input type="text" value={{mode.value}} disabled={{mode.preset}}
+    {{on "input" (fn this.updateField mode "value")}} />
+</label>
+<label>{{i18n "topic_content_view.admin.field_label"}}
+  <input type="text" value={{mode.label}}
+    {{on "input" (fn this.updateField mode "label")}} />
+</label>
+<label>{{i18n "topic_content_view.admin.field_classes"}}
+  <input type="text" value={{mode.classes}}
+    {{on "input" (fn this.updateField mode "classes")}} />
+</label>
+<label>{{i18n "topic_content_view.admin.field_css"}}
+  <textarea {{on "input" (fn this.updateCss mode)}}>{{mode.css}}</textarea>
+</label>
+<button class="btn btn-primary" {{on "click" this.saveAll}} disabled={{this.saving}}>
+  {{dIcon "floppy-disk"}} {{i18n "topic_content_view.admin.save_all"}}
+</button>
+
               </div>
             {{/if}}
           </div>
