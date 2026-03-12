@@ -20,14 +20,10 @@ after_initialize do
 
   require_relative "app/controllers/topic_content_view/admin_controller"
 
-  TopicContentView::AdminController.class_eval do
-    requires_plugin TopicContentView::PLUGIN_NAME
-  end
-
   Discourse::Application.routes.prepend do
-    namespace :topic_content_view, path: "/topic-content-view" do
-      get "admin" => "topic_content_view/admin#index", constraints: StaffConstraint.new
-      put "admin" => "topic_content_view/admin#update", constraints: StaffConstraint.new
-    end
+    get "/admin/plugins/topic-content-view" => "topic_content_view/admin#index",
+        constraints: StaffConstraint.new
+    put "/admin/plugins/topic-content-view" => "topic_content_view/admin#update",
+        constraints: StaffConstraint.new
   end
 end
