@@ -1,0 +1,7 @@
+en:
+  topic_content_view:
+    admin:
+      title: "Topic Content View"
+      description: "Configure per-mode CSS to apply when a topic is loaded with ?tcv=MODE. Enter valid CSS (plain CSS, not SCSS-compiled syntax) for each mode. Save each mode individually."
+      scss_label: "Custom CSS for this mode"
+      save_scss: "Save CSS"
