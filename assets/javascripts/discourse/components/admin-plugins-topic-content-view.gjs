@@ -57,13 +57,14 @@ export default class AdminPluginsTopicContentView extends Component {
 
   @action
   togglePlugin() {
+    const newValue = !this.pluginEnabled;
     this.saving = true;
     ajax("/admin/site_settings/topic_content_view_enabled", {
       type: "PUT",
-      data: { value: !this.pluginEnabled },
+      data: { value: newValue },
     })
       .then(() => {
-        this.siteSettings.topic_content_view_enabled = !this.pluginEnabled;
+        this.siteSettings.topic_content_view_enabled = newValue;
       })
       .catch(popupAjaxError)
       .finally(() => {
@@ -114,7 +115,8 @@ export default class AdminPluginsTopicContentView extends Component {
     try {
       await ajax("/admin/plugins/topic-content-view", {
         type: "PUT",
-        data: { modes: this.modes },
+        contentType: "application/json",
+        data: JSON.stringify({ modes: this.modes }),
       });
     } catch (e) {
       popupAjaxError(e);
@@ -122,136 +124,4 @@ export default class AdminPluginsTopicContentView extends Component {
       this.saving = false;
     }
   }
-
-  <template>
-    <div class="tcv-admin">
-      <div class="tcv-admin-header">
-        <div class="tcv-admin-header-text">
-          <h2>{{i18n "topic_content_view.admin.title"}}</h2>
-          <p class="tcv-admin-description">{{i18n "topic_content_view.admin.description"}}</p>
-        </div>
-        <div class="tcv-admin-header-actions">
-          <DToggleSwitch
-            @state={{this.pluginEnabled}}
-            {{on "click" this.togglePlugin}}
-          />
-          <button
-            type="button"
-            class="btn btn-primary"
-            disabled={{this.saving}}
-            {{on "click" this.saveAll}}
-          >
-            {{i18n "topic_content_view.admin.save_all"}}
-          </button>
-          <button
-            type="button"
-            class="btn btn-default"
-            {{on "click" this.addMode}}
-          >
-            {{i18n "topic_content_view.admin.add_mode"}}
-          </button>
-        </div>
-      </div>
-
-      {{#if this.loading}}
-        <div class="loading-spinner"></div>
-      {{else}}
-        <div class="tcv-mode-list">
-          {{#each this.modes as |mode|}}
-            <div class={{modeCardClass mode this.expandedMode}}>
-              <div class="tcv-mode-card-header">
-                <button
-                  type="button"
-                  class="tcv-mode-card-toggle-area"
-                  {{on "click" (fn this.toggleExpand mode)}}
-                >
-                  <span class="tcv-mode-card-arrow">
-                    {{#if (eq this.expandedMode mode.value)}}▼{{else}}▶{{/if}}
-                  </span>
-                  <span class="tcv-mode-card-title">
-                    {{#if mode.label}}
-                      {{mode.label}}
-                    {{else}}
-                      <span class="tcv-untitled">{{i18n "topic_content_view.admin.untitled"}}</span>
-                    {{/if}}
-                  </span>
-                  {{#if mode.value}}
-                    <span class="tcv-mode-card-slug">?tcv={{mode.value}}</span>
-                  {{/if}}
-                  {{#if mode.preset}}
-                    <span class="tcv-preset-badge">{{i18n "topic_content_view.admin.preset"}}</span>
-                  {{/if}}
-                </button>
-                <div class="tcv-mode-card-controls">
-                  <DToggleSwitch
-                    @state={{mode.enabled}}
-                    {{on "click" (fn this.toggleModeEnabled mode)}}
-                  />
-                  {{#unless mode.preset}}
-                    <button
-                      type="button"
-                      class="btn-flat tcv-delete-btn"
-                      title={{i18n "topic_content_view.admin.delete_mode"}}
-                      {{on "click" (fn this.removeMode mode)}}
-                    >
-                                  <dIcon @name="trash-can" />
-                    </button>
-                  {{/unless}}
-                </div>
-              </div>
-
-              {{#if (eq this.expandedMode mode.value)}}
-                <div class="tcv-mode-card-body">
-                  <div class="tcv-field-row">
-                    <label>{{i18n "topic_content_view.admin.field_label"}}</label>
-                    <input
-                      type="text"
-                      value={{mode.label}}
-                      {{on "input" (fn this.updateField mode "label")}}
-                    />
-                  </div>
-                  <div class="tcv-field-row">
-                    <label>{{i18n "topic_content_view.admin.field_value"}}</label>
-                    {{#if mode.preset}}
-                      <input type="text" value={{mode.value}} disabled />
-                      <p class="tcv-field-readonly-note">{{i18n "topic_content_view.admin.preset_readonly"}}</p>
-                    {{else}}
-                      <input
-                        type="text"
-                        value={{mode.value}}
-                        {{on "input" (fn this.updateField mode "value")}}
-                      />
-                    {{/if}}
-                    <p class="tcv-field-hint">{{i18n "topic_content_view.admin.field_value_hint"}}</p>
-                  </div>
-                  <div class="tcv-field-row">
-                    <label>{{i18n "topic_content_view.admin.field_classes"}}</label>
-                    {{#if mode.preset}}
-                      <input type="text" value={{mode.classes}} disabled />
-                      <p class="tcv-field-readonly-note">{{i18n "topic_content_view.admin.preset_readonly"}}</p>
-                    {{else}}
-                      <input
-                        type="text"
-                        value={{mode.classes}}
-                        {{on "input" (fn this.updateField mode "classes")}}
-                      />
-                    {{/if}}
-                    <p class="tcv-field-hint">{{i18n "topic_content_view.admin.field_classes_hint"}}</p>
-                  </div>
-                  <div class="tcv-field-row tcv-css-field">
-                    <label>{{i18n "topic_content_view.admin.field_css"}}</label>
-                    <textarea
-                      class="tcv-css-editor"
-                      {{on "input" (fn this.updateCss mode)}}
-                    >{{mode.css}}</textarea>
-                    <p class="tcv-field-hint">{{i18n "topic_content_view.admin.field_css_hint"}}</p>
-                  </div>
-                </div>
-              {{/if}}
-            </div>
-          {{/each}}
-        </div>
-      {{/if}}
-    </div>
-  </template>
 }
