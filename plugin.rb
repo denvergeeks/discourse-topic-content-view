@@ -21,58 +21,56 @@ after_initialize do
     end
   end
 
-  # Admin controller: serves mode list and handles SCSS save
+  # Admin controller: serves unified modes JSON and handles full save
   class TopicContentView::AdminController < ::Admin::AdminController
     requires_plugin TopicContentView::PLUGIN_NAME
 
     # GET /admin/plugins/topic-content-view
-    # Returns all modes (built-in + custom) and saved SCSS per mode
+    # Returns the parsed modes array
     def index
-      all_modes = parse_modes(SiteSetting.topic_content_view_modes) +
-                  parse_modes(SiteSetting.topic_content_view_custom_modes)
-
-      scss_map = begin
-        JSON.parse(SiteSetting.topic_content_view_mode_scss || '{}')
-      rescue JSON::ParserError
-        {}
-      end
-
-      render_json_dump(
-        modes: all_modes.map do |m|
-          m.merge(scss: scss_map[m[:value]] || '')
-        end
-      )
+      render_json_dump(modes: load_modes)
     end
 
     # PUT /admin/plugins/topic-content-view
-    # Saves SCSS for one mode: params { mode_value, scss }
+    # Saves the entire modes array: params { modes: [...] }
     def update
-      mode_value = params.require(:mode_value)
-      scss       = params.fetch(:scss, '')
+      modes = params.require(:modes)
 
-      scss_map = begin
-        JSON.parse(SiteSetting.topic_content_view_mode_scss || '{}')
-      rescue JSON::ParserError
-        {}
+      # Sanitise: ensure each mode is a hash with expected keys only
+      sanitised = Array(modes).filter_map do |m|
+        next unless m.is_a?(ActionController::Parameters) || m.is_a?(Hash)
+        m = m.to_unsafe_h.with_indifferent_access
+        next if m[:value].blank?
+        {
+          value:   m[:value].to_s.strip.downcase.gsub(/[^a-z0-9_-]/, ''),
+          label:   m[:label].to_s.strip,
+          classes: m[:classes].to_s.strip,
+          css:     m[:css].to_s,
+          preset:  m[:preset].present? ? true : false,
+        }
       end
 
-      scss_map[mode_value] = scss
-      SiteSetting.set(:topic_content_view_mode_scss, scss_map.to_json)
-
+      SiteSetting.set(:topic_content_view_modes, sanitised.to_json)
       render json: success_json
     end
 
     private
 
-    def parse_modes(raw)
-      return [] if raw.blank?
-      raw.split("\n").filter_map do |line|
-        line = line.strip
-        next if line.blank?
-        parts = line.split('|', 2)
-        next unless parts.length == 2
-        { value: parts[0].strip, classes: parts[1].strip }
-      end
+    def load_modes
+      raw = SiteSetting.topic_content_view_modes
+      return default_modes if raw.blank?
+      parsed = JSON.parse(raw)
+      parsed.is_a?(Array) ? parsed : default_modes
+    rescue JSON::ParserError
+      default_modes
+    end
+
+    def default_modes
+      [
+        { 'value' => 'content', 'label' => 'Content Only',  'classes' => 'tcv-mode',            'css' => '', 'preset' => true },
+        { 'value' => 'minimal', 'label' => 'Minimal',       'classes' => 'tcv-mode tcv-minimal', 'css' => '', 'preset' => true },
+        { 'value' => 'full',    'label' => 'Full',          'classes' => 'tcv-mode tcv-full',    'css' => '', 'preset' => true },
+      ]
     end
   end
 
