@@ -1,0 +1,38 @@
+<div class="tcv-admin">
+  <h2>{{i18n "topic_content_view.admin.title"}}</h2>
+  <p class="tcv-admin-description">{{i18n "topic_content_view.admin.description"}}</p>
+
+  {{#each this.model as |mode|}}
+    <div class="tcv-admin-mode-editor">
+      <div class="tcv-admin-mode-header">
+        <h3>
+          <code>?tcv={{mode.value}}</code>
+          <span class="tcv-admin-mode-classes">— body classes: <em>{{mode.classes}}</em></span>
+        </h3>
+      </div>
+
+      <div class="tcv-admin-mode-body">
+        <label>{{i18n "topic_content_view.admin.scss_label"}}</label>
+        <Textarea
+          @value={{mode.scss}}
+          class="tcv-scss-editor"
+          placeholder="/* SCSS applied when ?tcv={{mode.value}} is active */"
+          rows="12"
+        />
+        <div class="tcv-admin-mode-actions">
+          {{#if mode.saving}}
+            <span class="tcv-saving">{{i18n "saving"}}</span>
+          {{else if mode.saved}}
+            <span class="tcv-saved">{{i18n "saved"}}</span>
+          {{/if}}
+          <DButton
+            @action={{fn this.saveScss mode}}
+            @label="topic_content_view.admin.save_scss"
+            @disabled={{mode.saving}}
+            class="btn-primary"
+          />
+        </div>
+      </div>
+    </div>
+  {{/each}}
+</div>
