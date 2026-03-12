@@ -24,13 +24,13 @@ class ModeItem {
   _key;
 
   constructor({ value, label, classes, css, preset, enabled }) {
-    this.value = value ?? "";
-    this.label = label ?? "";
+    this.value   = value   ?? "";
+    this.label   = label   ?? "";
     this.classes = classes ?? "";
-    this.css = css ?? "";
-    this.preset = preset ?? false;
+    this.css     = css     ?? "";
+    this.preset  = preset  ?? false;
     this.enabled = enabled !== false;
-    this._key = uid();
+    this._key    = uid();
   }
 }
 
@@ -56,7 +56,9 @@ export default class AdminPluginsTopicContentView extends Component {
 
   @action
   addMode() {
-    const newMode = new ModeItem({ value: "", label: "", classes: "tcv-mode", css: "", preset: false, enabled: true });
+    const newMode = new ModeItem({
+      value: "", label: "", classes: "tcv-mode", css: "", preset: false, enabled: true
+    });
     newMode.expanded = true;
     this.modes = [newMode, ...this.modes];
   }
@@ -90,11 +92,11 @@ export default class AdminPluginsTopicContentView extends Component {
   @action
   async saveAll() {
     this._globalSaving = true;
-    this._globalSaved = false;
+    this._globalSaved  = false;
     const invalid = this.modes.find((m) => !m.value.trim());
     if (invalid) {
-      invalid.expanded = true;
-      this._globalSaving = false;
+      invalid.expanded    = true;
+      this._globalSaving  = false;
       return;
     }
     try {
@@ -102,11 +104,11 @@ export default class AdminPluginsTopicContentView extends Component {
         type: "PUT",
         data: {
           modes: this.modes.map((m) => ({
-            value: m.value.trim(),
-            label: m.label.trim(),
+            value:   m.value.trim(),
+            label:   m.label.trim(),
             classes: m.classes.trim(),
-            css: m.css,
-            preset: m.preset,
+            css:     m.css,
+            preset:  m.preset,
             enabled: m.enabled,
           })),
         },
