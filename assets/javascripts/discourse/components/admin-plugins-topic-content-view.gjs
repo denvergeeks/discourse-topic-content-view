@@ -2,6 +2,8 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { service } from "@ember/service";
+import { on } from "@ember/modifier";
+import { fn } from "@ember/helper";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import DButton from "discourse/components/d-button";
@@ -23,22 +25,21 @@ class ModeItem {
   _key; // stable identity for {{each}}
 
   constructor({ value, label, classes, css, preset, enabled }) {
-    this.value   = value   ?? "";
-    this.label   = label   ?? "";
+    this.value = value ?? "";
+    this.label = label ?? "";
     this.classes = classes ?? "";
-    this.css     = css     ?? "";
-    this.preset  = preset  ?? false;
+    this.css = css ?? "";
+    this.preset = preset ?? false;
     this.enabled = enabled !== false; // default on
-    this._key    = uid();
+    this._key = uid();
   }
 }
 
 export default class AdminPluginsTopicContentView extends Component {
   @service router;
-
   @tracked modes = [];
   @tracked _globalSaving = false;
-  @tracked _globalSaved  = false;
+  @tracked _globalSaved = false;
 
   constructor(owner, args) {
     super(owner, args);
@@ -54,8 +55,7 @@ export default class AdminPluginsTopicContentView extends Component {
     }
   }
 
-  // ── Actions ───────────────────────────────────────────────────────────────
-
+  // ── Actions ─────────────────────────────────────────────────────────────────────────────
   @action
   addMode() {
     const newMode = new ModeItem({ value: "", label: "", classes: "tcv-mode", css: "", preset: false, enabled: true });
@@ -92,25 +92,23 @@ export default class AdminPluginsTopicContentView extends Component {
   @action
   async saveAll() {
     this._globalSaving = true;
-    this._globalSaved  = false;
-
+    this._globalSaved = false;
     const invalid = this.modes.find((m) => !m.value.trim());
     if (invalid) {
       invalid.expanded = true;
       this._globalSaving = false;
       return;
     }
-
     try {
       await ajax("/admin/plugins/topic-content-view", {
         type: "PUT",
         data: {
           modes: this.modes.map((m) => ({
-            value:   m.value.trim(),
-            label:   m.label.trim(),
+            value: m.value.trim(),
+            label: m.label.trim(),
             classes: m.classes.trim(),
-            css:     m.css,
-            preset:  m.preset,
+            css: m.css,
+            preset: m.preset,
             enabled: m.enabled,
           })),
         },
@@ -124,8 +122,7 @@ export default class AdminPluginsTopicContentView extends Component {
     }
   }
 
-  // ── Template ──────────────────────────────────────────────────────────────
-
+  // ── Template ──────────────────────────────────────────────────────────────────────────────
   <template>
     <div class="tcv-admin">
       <div class="tcv-admin-header">
@@ -155,7 +152,6 @@ export default class AdminPluginsTopicContentView extends Component {
       <div class="tcv-mode-list">
         {{#each this.modes key="_key" as |mode|}}
           <div class="tcv-mode-card {{if mode.expanded 'is-expanded'}} {{if mode.preset 'is-preset'}} {{unless mode.enabled 'is-disabled'}}">
-
             {{! ── Card header ── }}
             <div class="tcv-mode-card-header">
               <span
@@ -164,7 +160,7 @@ export default class AdminPluginsTopicContentView extends Component {
                 {{on "click" (fn this.toggleExpanded mode)}}
               >
                 <span class="tcv-mode-card-arrow">
-                  {{#if mode.expanded}}&#9660;{{else}}&#9654;{{/if}}
+                  {{#if mode.expanded}}▼{{else}}▶{{/if}}
                 </span>
                 <span class="tcv-mode-card-title">
                   {{#if mode.label}}
@@ -180,7 +176,6 @@ export default class AdminPluginsTopicContentView extends Component {
                   <span class="tcv-preset-badge">{{i18n "topic_content_view.admin.preset"}}</span>
                 {{/if}}
               </span>
-
               <span class="tcv-mode-card-controls">
                 <DToggleSwitch
                   @state={{mode.enabled}}
@@ -201,7 +196,6 @@ export default class AdminPluginsTopicContentView extends Component {
             {{! ── Card body (expanded) ── }}
             {{#if mode.expanded}}
               <div class="tcv-mode-card-body">
-
                 <div class="tcv-field-row">
                   <label>{{i18n "topic_content_view.admin.field_label"}}</label>
                   <input
@@ -211,7 +205,6 @@ export default class AdminPluginsTopicContentView extends Component {
                     {{on "input" (fn this.updateField mode "label")}}
                   />
                 </div>
-
                 <div class="tcv-field-row">
                   <label>
                     {{i18n "topic_content_view.admin.field_value"}}
@@ -228,7 +221,6 @@ export default class AdminPluginsTopicContentView extends Component {
                   />
                   <p class="tcv-field-hint">{{i18n "topic_content_view.admin.field_value_hint"}}</p>
                 </div>
-
                 <div class="tcv-field-row">
                   <label>{{i18n "topic_content_view.admin.field_classes"}}</label>
                   <input
@@ -239,7 +231,6 @@ export default class AdminPluginsTopicContentView extends Component {
                   />
                   <p class="tcv-field-hint">{{i18n "topic_content_view.admin.field_classes_hint"}}</p>
                 </div>
-
                 <div class="tcv-field-row tcv-css-field">
                   <label>{{i18n "topic_content_view.admin.field_css"}}</label>
                   <textarea
@@ -250,14 +241,11 @@ export default class AdminPluginsTopicContentView extends Component {
                   >{{mode.css}}</textarea>
                   <p class="tcv-field-hint">{{i18n "topic_content_view.admin.field_css_hint"}}</p>
                 </div>
-
               </div>
             {{/if}}
-
           </div>
         {{/each}}
       </div>
-
     </div>
   </template>
 }
