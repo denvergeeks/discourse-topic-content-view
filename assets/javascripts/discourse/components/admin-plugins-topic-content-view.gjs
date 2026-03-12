@@ -111,8 +111,7 @@ export default class AdminPluginsTopicContentView extends Component {
     try {
       await ajax("/admin/plugins/topic-content-view", {
         type: "PUT",
-        data: JSON.stringify({ modes: this.modes }),
-        contentType: "application/json",
+        data: { modes: this.modes },
       });
     } catch (e) {
       popupAjaxError(e);
