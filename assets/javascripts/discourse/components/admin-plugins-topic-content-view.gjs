@@ -11,6 +11,14 @@ import { i18n } from "discourse-i18n";
 
 const eq = (a, b) => a === b;
 
+function modeCardClass(mode, expandedValue) {
+  const classes = ["tcv-mode-card"];
+  if (mode.preset) { classes.push("is-preset"); }
+  if (!mode.enabled) { classes.push("is-disabled"); }
+  if (mode.value === expandedValue) { classes.push("is-expanded"); }
+  return classes.join(" ");
+}
+
 export default class AdminPluginsTopicContentView extends Component {
   @service siteSettings;
 
@@ -144,12 +152,7 @@ export default class AdminPluginsTopicContentView extends Component {
       {{else}}
         <div class="tcv-mode-list">
           {{#each this.modes as |mode|}}
-            <div
-              class={{if mode.preset
-                (if (eq this.expandedMode mode.value) "tcv-mode-card is-preset is-expanded" "tcv-mode-card is-preset")
-                (if (eq this.expandedMode mode.value) "tcv-mode-card is-expanded" "tcv-mode-card")
-              }}
-            >
+            <div class={{modeCardClass mode this.expandedMode}}>
               <div class="tcv-mode-card-header">
                 <button
                   type="button"
