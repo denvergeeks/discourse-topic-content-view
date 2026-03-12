@@ -1,22 +1,16 @@
 import { withPluginApi } from "discourse/lib/plugin-api";
 
-// Parse the pipe-separated mode definitions from site settings.
-// Each entry is "mode_value|class1 class2 class3"
+// Parse the unified JSON modes array from the site setting.
+// Returns only modes that are enabled.
 function parseModes(rawSetting) {
   if (!rawSetting) return [];
-  return rawSetting
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const idx = line.indexOf("|");
-      if (idx === -1) return null;
-      return {
-        value: line.slice(0, idx).trim(),
-        classes: line.slice(idx + 1).trim().split(/\s+/).filter(Boolean),
-      };
-    })
-    .filter(Boolean);
+  try {
+    const modes = JSON.parse(rawSetting);
+    if (!Array.isArray(modes)) return [];
+    return modes.filter((m) => m && m.value && m.enabled !== false);
+  } catch (_) {
+    return [];
+  }
 }
 
 // Remove any previously applied tcv body classes
@@ -27,30 +21,19 @@ function clearTcvClasses() {
   document.body.classList.remove(...toRemove);
 }
 
-// Inject (or remove) the per-mode custom SCSS into a <style> tag
-function applyModeScss(modeValue, scssMap) {
-  // Remove any previously injected style
-  const existing = document.getElementById("tcv-mode-custom-scss");
+// Inject (or remove) the per-mode custom CSS into a <style> tag
+function applyModeCss(modeValue, modes) {
+  const existing = document.getElementById("tcv-mode-custom-css");
   if (existing) existing.remove();
 
-  if (!modeValue || !scssMap) return;
+  if (!modeValue || !modes || !modes.length) return;
 
-  let map = {};
-  try {
-    map = typeof scssMap === "string" ? JSON.parse(scssMap) : scssMap;
-  } catch (_) {
-    return;
-  }
+  const mode = modes.find((m) => m.value === modeValue);
+  if (!mode || !mode.css || !mode.css.trim()) return;
 
-  const scss = map[modeValue];
-  if (!scss || !scss.trim()) return;
-
-  // NOTE: Discourse compiles SCSS server-side; client-side we inject as plain CSS.
-  // Admins should write valid CSS (not SCSS-specific syntax like nesting or variables
-  // beyond CSS custom properties) for runtime injection to work correctly.
   const style = document.createElement("style");
-  style.id = "tcv-mode-custom-scss";
-  style.textContent = scss;
+  style.id = "tcv-mode-custom-css";
+  style.textContent = mode.css;
   document.head.appendChild(style);
 }
 
@@ -69,19 +52,18 @@ export default {
         const modeParam = new URLSearchParams(window.location.search).get("tcv");
         if (!modeParam) return;
 
-        // Merge built-in modes + admin-defined custom modes
-        const allModes = [
-          ...parseModes(siteSettings.topic_content_view_modes),
-          ...parseModes(siteSettings.topic_content_view_custom_modes),
-        ];
+        // Parse modes, filtering out disabled ones
+        const enabledModes = parseModes(siteSettings.topic_content_view_modes);
 
-        const match = allModes.find((m) => m.value === modeParam);
-        if (match) {
-          document.body.classList.add(...match.classes);
+        const match = enabledModes.find((m) => m.value === modeParam);
+        if (match && match.classes) {
+          document.body.classList.add(
+            ...match.classes.split(/\s+/).filter(Boolean)
+          );
         }
 
-        // Inject admin-saved SCSS for this mode
-        applyModeScss(modeParam, siteSettings.topic_content_view_mode_scss);
+        // Inject admin-saved CSS for this mode
+        applyModeCss(modeParam, enabledModes);
       });
     });
   },
