@@ -27,8 +27,8 @@ export default class AdminPluginsTopicContentView extends Component {
   @tracked expandedMode = null;
   @tracked loading = true;
 
-  constructor() {
-    super(...arguments);
+  constructor(owner, args) {
+    super(owner, args);
     this.loadModes();
   }
 
@@ -43,8 +43,9 @@ export default class AdminPluginsTopicContentView extends Component {
       this.modes = result.modes || [];
     } catch (e) {
       try {
-        const raw = this.siteSettings.topic_content_view_modes;
-        this.modes = JSON.parse(raw || "[]");
+        this.modes = JSON.parse(
+          this.siteSettings.topic_content_view_modes || "[]"
+        );
       } catch (_) {
         this.modes = [];
       }
@@ -147,7 +148,11 @@ export default class AdminPluginsTopicContentView extends Component {
         <div class="tcv-admin__modes">
           {{#each this.modes as |mode|}}
             <div class={{modeCardClass mode this.expandedMode}}>
-              <div class="tcv-mode-card__summary" role="button" {{on "click" (fn this.toggleExpand mode)}}>
+              <div
+                class="tcv-mode-card__summary"
+                role="button"
+                {{on "click" (fn this.toggleExpand mode)}}
+              >
                 <span class="tcv-mode-card__label">
                   {{if mode.label mode.label (i18n "topic_content_view.admin.untitled")}}
                 </span>
