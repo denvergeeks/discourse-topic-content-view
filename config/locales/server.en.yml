@@ -1,4 +1,4 @@
 en:
-  topic_content_view:
-    admin:
-      title: "Topic Content View"
+  site_settings:
+    topic_content_view_enabled: "Topic Content View enabled"
+    topic_content_view_modes: "Topic Content View modes (JSON)"
