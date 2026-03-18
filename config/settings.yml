@@ -12,6 +12,6 @@ plugins:
   # Managed via Admin > Plugins > Topic Content View
   topic_content_view_modes:
     default: |
-      [{"value":"content","label":"Content Only","classes":"tcv-mode","css":"","preset":true},{"value":"minimal","label":"Minimal","classes":"tcv-mode tcv-minimal","css":"","preset":true},{"value":"full","label":"Full","classes":"tcv-mode tcv-full","css":"","preset":true}]
+      [{"value":"content","label":"Content Only","classes":"tcv-mode","css":"","preset":true},{"value":"min","label":"Minimal","classes":"tcv-mode tcv-minimal","css":"","preset":true},{"value":"full","label":"Full","classes":"tcv-mode tcv-full","css":"","preset":true}]
     type: string
     client: true
